@@ -3,160 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Classical Plinko</title>
-  <!-- Google Font: Cinzel (classical style) -->
+  <title>Ancient Plinko 3D</title>
+  <!-- Google Fonts: Cinzel & Libre Baskerville for an ancient feel -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet" />
 
   <style>
     /* ===== Global Styling ===== */
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
+    html, body { margin: 0; padding: 0; height: 100%; background-color: #d9cbb7; }
     body {
-      background-color: #FDF5E6;             /* Parchment-like background */
-      font-family: 'Cinzel', serif;         /* Classical font */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      user-select: none;
-      overflow: hidden;
+      font-family: 'Cinzel', serif;
+      display: flex; flex-direction: column; align-items: center;
+      user-select: none; overflow: hidden;
     }
 
     /* ===== Clear Button ===== */
     #clear-btn {
-      margin: 10px;
-      padding: 8px 16px;
-      font-family: 'Cinzel', serif;
-      font-size: 16px;
-      color: #FDF5E6;
-      background-color: #8B4513;
-      border: 2px solid #8B4513;
-      border-radius: 4px;
-      cursor: pointer;
-      user-select: none;
+      margin: 10px; padding: 8px 16px;
+      font-family: 'Cinzel', serif; font-size: 16px;
+      color: #e0d7c5; background-color: #593c1f;
+      border: 2px solid #412e17; border-radius: 4px; cursor: pointer;
+      user-select: none; box-shadow: 2px 2px 5px rgba(0,0,0,0.6);
     }
-    #clear-btn:hover {
-      background-color: #A0522D;
-      border-color: #A0522D;
-    }
+    #clear-btn:hover { background-color: #6a4b2a; border-color: #4f3920; }
 
     /* ===== Wrapper to contain scaled board ===== */
     #wrapper {
-      width: 400px;  /* half of 800 */
-      height: 600px; /* half of 1200 */
-      overflow: hidden;
-      border: 5px solid #8B4513;
-      background-color: #FDF5E6;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-      position: relative;
+      width: 400px; height: 600px; overflow: hidden;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e6/Old_paper_texture-TIP_small.jpg');
+      background-size: cover; background-position: center;
+      border: 30px solid transparent;
+      border-image: url('https://upload.wikimedia.org/wikipedia/commons/a/a0/Greek-Key-Design-01.png') 50 round;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6); position: relative;
+      perspective: 1000px;
     }
 
     /* ===== Scaled Canvas Container ===== */
     #plinko-container {
-      position: relative;
-      width: 800px;
-      height: 1200px;
-      transform: scale(0.5);
-      transform-origin: top left;
-      background-color: #FDF5E6;
+      position: relative; width: 800px; height: 1200px;
+      transform: scale(0.5); transform-origin: top left;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/2/26/Marble_texture_04.jpg');
+      background-size: cover; background-position: center; opacity: 0.95;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5), inset 10px 10px 30px rgba(255,255,255,0.3), 0 15px 25px rgba(0,0,0,0.5);
+      border-radius: 8px;
     }
 
     /* ===== “Click to Drop” hint ===== */
     #hint {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #8B4513;
-      font-weight: bold;
-      font-size: 18px;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-      pointer-events: none;
-      user-select: none;
+      position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+      color: #3f2e1b; font-family: 'Libre Baskerville', serif; font-size: 22px;
+      text-shadow: 1px 1px 2px rgba(255,255,255,0.7); pointer-events: none; user-select: none;
     }
 
     /* ===== Bin Labels ===== */
     .bin-label {
-      position: absolute;
-      color: #8B4513;
-      font-size: 24px;
-      font-weight: bold;
-      transform: translateX(-50%);
-      user-select: text;
-      pointer-events: auto;
-      cursor: text;
-      width: 100px;
-      text-align: center;
+      position: absolute; color: #3f2e1b; font-family: 'Libre Baskerville', serif;
+      font-size: 30px; font-weight: bold; text-shadow: 1px 1px 2px rgba(255,255,255,0.7);
+      transform: translateX(-50%); user-select: text; pointer-events: auto;
+      cursor: text; width: 100px; text-align: center;
     }
     .bin-label[contenteditable="true"] {
-      outline: 2px dashed #8B4513;
-      padding: 2px;
-      background-color: rgba(255, 255, 255, 0.8);
+      outline: 2px dashed #6a4b2a; padding: 2px; background-color: rgba(255,245,230,0.7);
     }
 
-    /* ===== Preview Chip ===== */
+    /* ===== Preview Marble ===== */
     #preview {
-      position: absolute;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background-color: rgba(218, 165, 32, 0.7); /* semitransparent gold */
-      pointer-events: none;
-      display: none;
-      transform: translate(-12px, 0); /* center horizontally on x */
+      position: absolute; width: 30px; height: 30px; border-radius: 50%;
+      background: radial-gradient(circle at 12px 12px, #f5e041, #b8860b, #654300);
+      pointer-events: none; display: none; transform: translate(-15px, 0);
+      box-shadow: inset -4px -4px 8px rgba(255,255,255,0.8), 2px 4px 8px rgba(0,0,0,0.6);
+      border: 1px solid #593c1f;
     }
   </style>
 </head>
-
 <body>
   <button id="clear-btn">Clear Board</button>
   <div id="wrapper">
     <div id="plinko-container">
-      <div id="hint">Click Anywhere to Drop a Chip</div>
+      <div id="hint">Click Anywhere to Drop a Marble</div>
       <div id="preview"></div>
-      <!-- Matter.js will append its own <canvas> here -->
     </div>
   </div>
 
-  <!-- Matter.js from CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-
   <script>
-    // ==== 1. MODULE ALIASES ====
-    const Engine = Matter.Engine;
-    const Render = Matter.Render;
-    const Runner = Matter.Runner;
-    const Bodies = Matter.Bodies;
-    const Body = Matter.Body;
-    const World = Matter.World;
-    const Events = Matter.Events;
+    const Engine = Matter.Engine,
+          Render = Matter.Render,
+          Runner = Matter.Runner,
+          Bodies = Matter.Bodies,
+          Body = Matter.Body,
+          World = Matter.World,
+          Events = Matter.Events;
 
-    // ==== Track dropped chips ====
     const chips = [];
-
-    // ==== 2. CREATE ENGINE & WORLD ====
     const engine = Engine.create();
     const world = engine.world;
 
-    // ==== 3. SETUP VARIABLES ====
     const container = document.getElementById('plinko-container');
-    const wrapper = document.getElementById('wrapper');
     const preview = document.getElementById('preview');
     const width = 800;
     const height = 1200;
     const boundaryThickness = 20;
     const dividerHeight = 200;
-    const chipRadius = 12;
-    const pegRadius = 8;
+    const chipRadius = 12 * 1.1; // 10% larger
+    const pegRadius = 10;
     const verticalSpacing = 60;
     const horizontalSpacing = 60;
     const yOffset = 100;
     const slotCount = 7;
 
-    // ==== 4. SETUP RENDERER ====
+    // 1) SETUP RENDERER
     const render = Render.create({
       element: container,
       engine: engine,
@@ -164,73 +120,61 @@
         width: width,
         height: height,
         wireframes: false,
-        background: '#FDF5E6'
+        background: 'transparent'
       }
     });
     Render.run(render);
 
-    // ==== 5. RUN THE ENGINE ====
+    // 2) RUN ENGINE
     const runner = Runner.create();
     Runner.run(runner, engine);
 
-    // ==== 6. ADD STATIC BOUNDARIES ====
-    const floor = Bodies.rectangle(
-      width / 2,
-      height + boundaryThickness / 2,
-      width + 2 * boundaryThickness,
-      boundaryThickness,
-      { isStatic: true, render: { fillStyle: '#8B4513' } }
-    );
-    const wallLeft = Bodies.rectangle(
-      -boundaryThickness / 2,
-      height / 2,
-      boundaryThickness,
-      height,
-      { isStatic: true, render: { fillStyle: '#8B4513' } }
-    );
-    const wallRight = Bodies.rectangle(
-      width + boundaryThickness / 2,
-      height / 2,
-      boundaryThickness,
-      height,
-      { isStatic: true, render: { fillStyle: '#8B4513' } }
-    );
+    // 3) DRAW HIGHLIGHT AFTER each frame for sphere effect
+    Events.on(render, 'afterRender', function() {
+      const ctx = render.context;
+      chips.forEach(chip => {
+        const pos = chip.position;
+        ctx.beginPath();
+        // smaller highlight for realistic shading
+        ctx.arc(pos.x - chipRadius * 0.15, pos.y - chipRadius * 0.15, chipRadius * 0.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.fill();
+      });
+    });
+
+    // 4) BUILD BOUNDARIES
+    const floor = Bodies.rectangle(width/2, height + boundaryThickness/2, width + 2*boundaryThickness, boundaryThickness, { isStatic: true, render: { fillStyle: '#3f2e1b' } });
+    const wallLeft = Bodies.rectangle(-boundaryThickness/2, height/2, boundaryThickness, height, { isStatic: true, render: { fillStyle: '#3f2e1b' } });
+    const wallRight = Bodies.rectangle(width + boundaryThickness/2, height/2, boundaryThickness, height, { isStatic: true, render: { fillStyle: '#3f2e1b' } });
     World.add(world, [floor, wallLeft, wallRight]);
 
-    // ==== 7. CREATE BINS (7 SLOTS) ====
+    // 5) CREATE BINS
     const slotWidthVal = width / slotCount;
-    const dividerThickness = 10;
+    const dividerThickness = 12;
     for (let i = 0; i <= slotCount; i++) {
       const xPos = i * slotWidthVal;
-      const divider = Bodies.rectangle(
-        xPos,
-        height - dividerHeight / 2,
-        dividerThickness,
-        dividerHeight,
-        { isStatic: true, render: { fillStyle: '#8B4513' } }
-      );
+      const divider = Bodies.rectangle(xPos, height - dividerHeight/2, dividerThickness, dividerHeight, { isStatic: true, render: { fillStyle: '#3f2e1b' } });
       World.add(world, divider);
     }
 
-    // ==== 8. CREATE PEGS IN A TRIANGULAR GRID ====
+    // 6) CREATE PEGS with slight restitution variation and friction
     const pegRows = Math.floor((height - dividerHeight - yOffset) / verticalSpacing) + 1;
     for (let row = 0; row < pegRows; row++) {
       const y = yOffset + row * verticalSpacing;
-      const xStart = (row % 2 === 0)
-        ? pegRadius
-        : pegRadius + horizontalSpacing / 2;
+      const xStart = (row % 2 === 0) ? pegRadius : pegRadius + horizontalSpacing / 2;
       for (let x = xStart; x <= width - pegRadius; x += horizontalSpacing) {
         const peg = Bodies.circle(x, y, pegRadius, {
           isStatic: true,
-          restitution: 0.5,
-          render: { fillStyle: '#DDDDDD', strokeStyle: '#888888', lineWidth: 2 }
+          restitution: 0.5 + (Math.random() - 0.5) * 0.04, // ±0.02 around 0.5
+          friction: 0.02,
+          render: { fillStyle: '#a67c52', strokeStyle: '#6b4f3b', lineWidth: 2 }
         });
         World.add(world, peg);
       }
     }
 
-    // ==== 9. ADD EDITABLE BIN LABELS ====
-    const binLabels = ['1','2','3','4','5','6','7'];
+    // 7) ADD BIN LABELS
+    const binLabels = ['I','II','III','IV','V','VI','VII'];
     binLabels.forEach((text, index) => {
       const labelDiv = document.createElement('div');
       labelDiv.className = 'bin-label';
@@ -242,21 +186,22 @@
       container.appendChild(labelDiv);
     });
 
-    // ==== 10. DROP CHIP FUNCTION ==== 
+    // 8) DROP CHIP: slight restitution variation
     function dropChip(x) {
       const chip = Bodies.circle(x, chipRadius * 2, chipRadius, {
-        restitution: 0.5,
+        restitution: 0.5 + (Math.random() - 0.5) * 0.04, // ±0.02 around 0.5
         friction: 0.02,
         density: 0.001,
-        render: { fillStyle: '#DAA520', strokeStyle: '#8B4513', lineWidth: 2 }
+        render: { fillStyle: '#f5e041', strokeStyle: '#8b6e00', lineWidth: 2 }
       });
       World.add(world, chip);
       chips.push(chip);
-      const jitter = (Math.random() - 0.5) * 2;
+      const jitter = (Math.random() - 0.5) * 4; // ±2
       Body.setVelocity(chip, { x: jitter, y: 0 });
+      Body.setAngularVelocity(chip, (Math.random() - 0.5) * 0.1);
     }
 
-    // ==== 11. MOUSE MOVE → SHOW PREVIEW ==== 
+    // 9) PREVIEW & CLICK HANDLERS
     container.addEventListener('mousemove', function(e) {
       const rect = container.getBoundingClientRect();
       const scale = rect.width / width;
@@ -269,7 +214,6 @@
       preview.style.display = 'none';
     });
 
-    // ==== 12. CLICK → DROP CHIP ==== 
     container.addEventListener('click', function(e) {
       if (e.target.classList.contains('bin-label')) return;
       const rect = container.getBoundingClientRect();
@@ -279,13 +223,11 @@
       preview.style.display = 'none';
     });
 
-    // ==== 13. CLEAR BOARD BUTTON ==== 
     document.getElementById('clear-btn').addEventListener('click', function() {
       chips.forEach(chip => World.remove(world, chip));
       chips.length = 0;
     });
 
-    // ==== 14. REMOVE HINT AFTER FIRST DROP ==== 
     let hintRemoved = false;
     container.addEventListener('click', function(e) {
       if (!hintRemoved && !e.target.classList.contains('bin-label')) {
@@ -293,9 +235,6 @@
         hintRemoved = true;
       }
     });
-
-    // ==== 15. ENGINE EVENTS ==== 
-    Events.on(engine, 'afterUpdate', function() {});
   </script>
 </body>
 </html>
